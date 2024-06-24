@@ -1,0 +1,30 @@
+{
+  "name": "nimpl-router",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "nimpl:router": "pnpm --filter @nimpl/router",
+    "lint": "eslint \"package/\"",
+    "eslint": "eslint",
+    "prettier": "prettier",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vordgi/nimpl-router.git"
+  },
+  "author": {
+    "name": "Savelyev Alexander",
+    "email": "vordgi1@gmail.com",
+    "url": "https://github.com/vordgi/"
+  },
+  "devDependencies": {
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^9.0.11",
+    "prettier": "^3.2.5",
+    "typescript-eslint": "^7.6.0"
+  },
+  "license": "MIT"
+}
