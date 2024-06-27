@@ -1,6 +1,34 @@
 # @nimpl/router
 
+Edge router for next.js apps. Allows you to configure rewrites, redirects, i18n and basePath at the middleware level instead of next.config.js.
+
 Visit https://nimpl.tech/router to view the full documentation.
+
+```js
+import { createMiddleware } from "@nimpl/router";
+
+export const middleware = createMiddleware({
+  redirects: [
+    {
+      source: "/old",
+      destination: "/",
+      permanent: false,
+    },
+  ],
+  rewrites: [
+    {
+      source: "/home",
+      destination: "/",
+      locale: false,
+    },
+  ],
+  basePath: "/doc",
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "de"],
+  },
+});
+```
 
 ## Installation
 
