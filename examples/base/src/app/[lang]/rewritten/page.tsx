@@ -1,9 +1,11 @@
 import Nav from "../../../components/nav";
 
-export default function Rewritten({ params }: { params: { lang: string } }) {
+export default async function Rewritten({ params }: { params: Promise<{ lang: string }> }) {
+    const { lang } = await params;
+
     return (
         <div>
-            <h1>i18n {params.lang} rewritten page</h1>
+            <h1>i18n {lang} rewritten page</h1>
             <pre>
                 {`rewrites: [
     {
