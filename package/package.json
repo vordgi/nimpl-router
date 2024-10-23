@@ -14,7 +14,12 @@
     "next.js",
     "react.js",
     "middleware",
-    "edge"
+    "edge",
+    "router",
+    "navigation",
+    "i18n",
+    "rewrites",
+    "redirects"
   ],
   "repository": {
     "type": "git",
