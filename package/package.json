@@ -1,6 +1,6 @@
 {
   "name": "@nimpl/router",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Edge router for next.js apps (i18n, basePath, rewrites, redirects)",
   "main": "./dist/middleware.js",
   "files": [
