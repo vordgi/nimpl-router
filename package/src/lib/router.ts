@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { type Rewrite, type Redirect } from "./types/changers";
 import { type ChangerOptions } from "./types/changers";
 import { formatDestination } from "./utils/format-destination";
-import { testRule } from "./utils/test-rule";
+import { createRuleTester } from "./utils/test-rule";
 
 export class Router {
     rewrites?: ChangerOptions["rewrites"];
@@ -21,7 +21,7 @@ export class Router {
         this.i18n = opts.i18n;
     }
 
-    getRequestLocale = (url: URL) => {
+    getRequestLocale = async (url: URL) => {
         if (!this.i18n) return null;
 
         const domainI18n = this.i18n.domains?.find((domainData) => domainData.domain === url.host);
@@ -30,7 +30,12 @@ export class Router {
         const defaultLocale = domainI18n?.defaultLocale || this.i18n.defaultLocale;
 
         const pathnameLocale = url.pathname.match(new RegExp(`/(?<locale>${locales.join("|")})(?:/|$)`));
-        const preferredLocale = pathnameLocale?.groups?.locale || cookies().get("NEXT_LOCALE")?.value;
+        let preferredLocale = pathnameLocale?.groups?.locale;
+
+        if (!preferredLocale) {
+            const cookiesStore = await cookies();
+            preferredLocale = cookiesStore.get("NEXT_LOCALE")?.value;
+        }
 
         if (preferredLocale) return preferredLocale;
 
@@ -38,7 +43,7 @@ export class Router {
         return detectedLocale || defaultLocale;
     };
 
-    findChanger = <T extends Redirect[] | Rewrite[]>(
+    findChanger = async <T extends Redirect[] | Rewrite[]>(
         changers: T,
         url: URL,
         routeData: {
@@ -71,10 +76,12 @@ export class Router {
 
             const groups = match.groups || {};
 
+            const testRule = createRuleTester();
+
             if (changer.has) {
                 let validRules = true;
                 for (const rule of changer.has) {
-                    const { match, groups: ruleGroups } = testRule(url, rule);
+                    const { match, groups: ruleGroups } = await testRule(url, rule);
 
                     if (!match) {
                         validRules = false;
@@ -89,7 +96,7 @@ export class Router {
             if (changer.missing) {
                 let validRules = true;
                 for (const rule of changer.missing) {
-                    const { match, groups: ruleGroups } = testRule(url, rule);
+                    const { match, groups: ruleGroups } = await testRule(url, rule);
 
                     if (match) {
                         validRules = false;
@@ -129,18 +136,19 @@ export class Router {
         return routeData;
     }
 
-    navigate(nextUrl: URL) {
+    async navigate(nextUrl: URL) {
         const originRouteData = this.parsePathname(nextUrl.pathname);
         const nextRouteData = {
             basePath: this.basePath,
-            locale: originRouteData.locale || this.getRequestLocale(nextUrl),
+            locale: originRouteData.locale,
             pathname: originRouteData.pathname,
             type: "none" as "none" | "rewrite" | "redirect",
             status: 200,
         };
+        if (!nextRouteData.locale) nextRouteData.locale = await this.getRequestLocale(nextUrl);
 
         if (this.redirects) {
-            const targetChanger = this.findChanger(this.redirects, nextUrl, originRouteData);
+            const targetChanger = await this.findChanger(this.redirects, nextUrl, originRouteData);
 
             if (targetChanger) {
                 const destination = formatDestination(targetChanger.changer.destination, targetChanger.groups);
@@ -152,7 +160,7 @@ export class Router {
             }
         }
         if (this.rewrites && nextRouteData.type !== "redirect") {
-            const targetChanger = this.findChanger(this.rewrites, nextUrl, originRouteData);
+            const targetChanger = await this.findChanger(this.rewrites, nextUrl, originRouteData);
 
             if (targetChanger) {
                 const destination = formatDestination(targetChanger.changer.destination, targetChanger.groups);
