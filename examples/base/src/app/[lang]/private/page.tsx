@@ -1,9 +1,11 @@
 import Nav from "../../../components/nav";
 
-export default function Private({ params }: { params: { lang: string } }) {
+export default async function Private({ params }: { params: Promise<{ lang: string }> }) {
+    const { lang } = await params;
+
     return (
         <div>
-            <h1>i18n {params.lang} private page</h1>
+            <h1>i18n {lang} private page</h1>
             <pre>
                 {`redirects: [
     {
